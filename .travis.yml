@@ -9,31 +9,15 @@ php:
     - hhvm
     - hhvm-nightly
 
-env: SYMFONY_VERSION=2.3.*
+env: SYMFONY_VERSION=2.8.*
 
 before_script:
-    - composer self-update
-    - composer require --no-update symfony/symfony:${SYMFONY_VERSION}
-    - composer install --prefer-source
-
-script: bin/phpunit --coverage-clover clover.xml
-
-after_script: bin/coveralls
+  - composer require symfony/symfony:${SYMFONY_VERSION} --no-update
+  - composer install --dev --prefer-source
 
 matrix:
-    include:
-        - php: 5.5
-          env: SYMFONY_VERSION=2.2.*
-        - php: 5.5
-          env: SYMFONY_VERSION=2.4.*
-        - php: 5.5
-          env: SYMFONY_VERSION=2.5.*
-        - php: 5.5
-          env: SYMFONY_VERSION=dev-master
-    allow_failures:
-        - php: hhvm
-        - php: hhvm-nightly
-        - env: SYMFONY_VERSION=dev-master
+  allow_failures:
+    - php: hhvm
 
 notifications:
     email: whyte624@gmail.com
