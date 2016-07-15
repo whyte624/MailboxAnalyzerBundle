@@ -1,0 +1,45 @@
+{
+  "name": "whyte624/MailboxAnalyzerBundle",
+  "description": "Checks mailboxes, to unsubscribe (or other actions) users",
+  "type": "symfony-bundle",
+  "homepage": "https://github.com/whyte624/MailboxAnalyzerBundle",
+  "authors": [
+    {
+      "name": "Andrei Sozonov",
+      "email": "whyte624@gmail.com",
+      "homepage": "http://whyte624.ru"
+    }
+  ],
+  "keywords": [
+    "mail",
+    "imap",
+    "pop3",
+    "unsubscribe",
+    "mailbox",
+    "symfony"
+  ],
+  "license": [
+    "MIT"
+  ],
+  "require": {
+    "php": "~5.3 | ~7.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Whyte624\\SonataAdminExtraExportBundle": ""
+    },
+    "exclude-from-classmap": [
+      "Tests/"
+    ]
+  },
+  "target-dir": "Whyte624/MailboxAnalyzerBundle",
+  "repositories": [
+    {
+    }
+  ],
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0-dev"
+    }
+  }
+}
