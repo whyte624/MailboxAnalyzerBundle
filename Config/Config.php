@@ -14,13 +14,13 @@ class Config
     /**
      * @var Mailbox[]
      */
-    protected $mailboxes = [];
+    protected $mailboxes = array();
 
     /**
      * Config constructor.
      * @param array $config
      */
-    public function __construct(array $config = [])
+    public function __construct(array $config = array())
     {
         $this->config = $config;
         if (array_key_exists('mailboxes', $config)) {

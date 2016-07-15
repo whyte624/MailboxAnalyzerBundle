@@ -11,7 +11,7 @@ class UndeliverableChain
     /**
      * @var UndeliverableInterface[]
      */
-    protected $strategies = [];
+    protected $strategies = array();
 
     /**
      * @param UndeliverableInterface $strategy

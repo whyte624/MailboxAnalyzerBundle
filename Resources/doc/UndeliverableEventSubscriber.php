@@ -1,6 +1,6 @@
 <?php
 
-namespace App\ClientBundle\EventListener;
+namespace UserBundle\EventListener;
 
 use UserBundle\Entity\User;
 use Doctrine\ORM\EntityManager;
