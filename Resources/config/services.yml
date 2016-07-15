@@ -1,10 +1,10 @@
 parameters:
     mailbox_analyzer.logger.class: Symfony\Bridge\Monolog\Logger
-    mailbox_analyzer.logger_handler.class: Whyte624\LoggingBundle\Handler\StreamHandler
+    mailbox_analyzer.logger_handler.class: Monolog\Handler\StreamHandler
     mailbox_analyzer.config.class: Whyte624\MailboxAnalyzerBundle\Config\Config
     mailbox_analyzer.strategy.undeliverable_chain.class: Whyte624\MailboxAnalyzerBundle\Strategy\Undeliverable\UndeliverableChain
-    mailbox_analyzer.strategy.undeliverable.abuse.class: Whyte624\MailboxAnalyzerBundle\Strategy\Undeliverable\AbuseStrategy
-    mailbox_analyzer.strategy.undeliverable.undelivered.class: Whyte624\MailboxAnalyzerBundle\Strategy\Undeliverable\UndeliveredStrategy
+#    mailbox_analyzer.strategy.undeliverable.abuse.class: Whyte624\MailboxAnalyzerBundle\Strategy\Undeliverable\AbuseStrategy
+#    mailbox_analyzer.strategy.undeliverable.undelivered.class: Whyte624\MailboxAnalyzerBundle\Strategy\Undeliverable\UndeliveredStrategy
 services:
     mailbox_analyzer.logger:
         class: '%mailbox_analyzer.logger.class%'
@@ -13,17 +13,17 @@ services:
             - [ pushHandler, ['@mailbox_analyzer.logger_handler'] ]
     mailbox_analyzer.logger_handler:
         class: '%mailbox_analyzer.logger_handler.class%'
-        arguments: ['%kernel.logs_dir%/RoboMailboxAnalyzerBundle/analyze.log', 200]
+        arguments: ['%kernel.logs_dir%/Whyte624MailboxAnalyzerBundle/analyze.log', 200]
 
     mailbox_analyzer.config:
         class: '%mailbox_analyzer.config.class%'
     mailbox_analyzer.strategy.undeliverable_chain:
         class: '%mailbox_analyzer.strategy.undeliverable_chain.class%'
-    mailbox_analyzer.strategy.undeliverable.abuse:
-        class: '%mailbox_analyzer.strategy.undeliverable.abuse.class%'
-        tags:
-            -  { name: mailbox_analyzer.strategy.undeliverable }
-    mailbox_analyzer.strategy.undeliverable.undelivered:
-        class: '%mailbox_analyzer.strategy.undeliverable.undelivered.class%'
-        tags:
-            -  { name: mailbox_analyzer.strategy.undeliverable }
+#    mailbox_analyzer.strategy.undeliverable.abuse:
+#        class: '%mailbox_analyzer.strategy.undeliverable.abuse.class%'
+#        tags:
+#            -  { name: mailbox_analyzer.strategy.undeliverable }
+#    mailbox_analyzer.strategy.undeliverable.undelivered:
+#        class: '%mailbox_analyzer.strategy.undeliverable.undelivered.class%'
+#        tags:
+#            -  { name: mailbox_analyzer.strategy.undeliverable }

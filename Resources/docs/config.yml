@@ -1,0 +1,24 @@
+mailbox_analyzer:
+    mailboxes:
+        newsletter:
+            host: mail.example.com
+            port: 143
+            mailbox: INBOX
+            username: newsletter@example.com
+            password: ***
+        support:
+            host: mail.example.com
+            port: 143
+            mailbox: INBOX
+            username: support@example.com
+            password: ***
+
+services:
+    mailbox_analyzer.strategy.undeliverable.abuse:
+        class: Whyte624\MailboxAnalyzerBundle\Strategy\Undeliverable\AbuseStrategy
+        tags:
+            -  { name: mailbox_analyzer.strategy.undeliverable }
+    mailbox_analyzer.strategy.undeliverable.undelivered:
+        class: Whyte624\MailboxAnalyzerBundle\Strategy\Undeliverable\UndeliveredStrategy
+        tags:
+            -  { name: mailbox_analyzer.strategy.undeliverable }

@@ -3,6 +3,7 @@ namespace Whyte624\MailboxAnalyzerBundle\Model;
 
 /**
  * Class Headers
+ * Information on Headers fields
  * @property string $date
  * @property string $subject
  * @property string $message_id

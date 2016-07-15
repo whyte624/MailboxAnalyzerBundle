@@ -1,17 +1,17 @@
 <?php
 namespace Whyte624\MailboxAnalyzerBundle\Command;
 
-use Whyte624\LoggingBundle\Handler\StreamHandler;
-use Whyte624\MailboxAnalyzerBundle\Entity\MailboxMessage;
-use Whyte624\MailboxAnalyzerBundle\Strategy\Undeliverable\UndelivarableEvent;
+use Monolog\Handler\StreamHandler;
+use Whyte624\MailboxAnalyzerBundle\Model\Headers;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Output\OutputInterface;
+use Whyte624\MailboxAnalyzerBundle\Strategy\Undeliverable\UndelivarableEvent;
 
 /**
- * Class AnalyzeCommand
+ * Class ImportCommand
  */
 class AnalyzeCommand extends ContainerAwareCommand
 {
@@ -20,8 +20,8 @@ class AnalyzeCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            ->setName('robo-mailbox-analyzer:analyze')
-            ->setDescription('Analyzes imported messages')
+            ->setName('whyte624:mailbox-analyzer:import')
+            ->setDescription('Imports mails from mailboxes')
             ->addOption('all', null, InputOption::VALUE_NONE);
     }
 
@@ -33,51 +33,68 @@ class AnalyzeCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $container = $this->getContainer();
-        $chain = $container->get('mailbox_analyzer.strategy.undeliverable_chain');
-        $em = $container->get('doctrine.orm.entity_manager');
-        $dispatcher = $container->get('event_dispatcher');
-        $logger = $container->get('mailbox_analyzer.analyze.logger');
+        $config = $container->get('mailbox_analyzer.config');
+        $logger = $container->get('mailbox_analyzer.logger');
         if ($output->isDebug()) {
             $logger->pushHandler(new StreamHandler(STDOUT));
         }
+        $logger->info('Start import');
+        foreach ($config->getMailboxes() as $mboxConfig) {
+            $mailbox = $mboxConfig->getName();
+            
+            $mbox = imap_open(
+                $mboxConfig->getMailboxConnectionString(),
+                $mboxConfig->getUsername(),
+                $mboxConfig->getPassword()
+            );
+            
+            if (!$mbox) {
+                $logger->error(sprintf('Cannot connect to mailbox %s', $mailbox));
+                continue;
+            }
+                
+            if ($input->getOption('all')) {
+                $msgnos = imap_search($mbox, 'ALL');
+            } else {
+                $since = new \DateTime('-1 day');
+                $msgnos = imap_search($mbox, sprintf('SINCE "%s"', $since->format(\DateTime::RFC822)));
+            }
+            $logger->info(sprintf('Importing from %s. Number of messages: %d', $mailbox, count($msgnos)));
 
-        $logger->info('Start analyze');
-        $i = 0;
-        $qb = $em->getRepository('RoboMailboxAnalyzerBundle:MailboxMessage')
-            ->createQueryBuilder('t');
-        if (!$input->getOption('all')) {
-            $qb->where('t.isProcessed = :isProcessed')->setParameter('isProcessed', false);
-        }
-        $iterator = $qb->getQuery()->iterate();
-
-        $strategies = $chain->getStrategies();
-        while (($row = $iterator->next()) !== false) {
-            $message = $row[0];
-            /** @var MailboxMessage $message */
-            foreach ($strategies as $strategy) {
-                if ($strategy->isUndeliverable($message)) {
-                    $email = $strategy->extractReceiver($message);
-                    $logger->info(sprintf('Undeliverable message to %s', $email));
-                    $event = new UndelivarableEvent($email);
-                    $dispatcher->dispatch(UndelivarableEvent::NAME, $event);
-                    break;
+            if (is_array($msgnos)) {
+                foreach ($msgnos as $msgno) {
+                    $uid = imap_uid($mbox, $msgno);
+                    /** @var Headers $headers */
+                    $headers = imap_headerinfo($mbox, $msgno);
+                    $body = imap_body($mbox, $msgno);
+                    $this->analyze($headers, $body);
                 }
             }
-            $message->setIsProcessed(true);
-            $em->persist($message);
-            if (($i % self::BATCH_SIZE) === 0) {
-                $em->flush();
-                $em->clear();
-            }
-            ++$i;
+            imap_close($mbox);
         }
-        $em->flush();
-        
-        $qb = $em->getRepository('RoboMailboxAnalyzerBundle:MailboxMessage')->createQueryBuilder('t')->delete()
-            ->where('t.isProcessed = :isProcessed')
-            ->setParameter('isProcessed', true);
-        $qty = $qb->getQuery()->execute();
-        $logger->debug(sprintf('Processed messages are deleted: %d', $qty));
-        $logger->info('Stop analyze');
+        $logger->info('Stop import');
+    }
+
+    private function analyze($headers, $body)
+    {
+        /** @var Headers $headers */
+        $container = $this->getContainer();
+        $chain = $container->get('mailbox_analyzer.strategy.undeliverable_chain');
+        $em = $container->get('doctrine.orm.entity_manager');
+        $dispatcher = $container->get('event_dispatcher');
+        $logger = $container->get('mailbox_analyzer.logger');
+
+        $logger->debug('Analyzing new message');
+
+        $strategies = $chain->getStrategies();
+        foreach ($strategies as $strategy) {
+            if ($strategy->isUndeliverable($headers, $body)) {
+                $email = $strategy->extractReceiver($headers, $body);
+                $logger->info(sprintf('Undeliverable message to %s', $email));
+                $event = new UndelivarableEvent($email);
+                $dispatcher->dispatch(UndelivarableEvent::NAME, $event);
+                break;
+            }
+        }
     }
 }

@@ -7,9 +7,9 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /**
- * Class RoboMailboxAnalyzerBundle
+ * Class Whyte624MailboxAnalyzerBundle
  */
-class RoboMailboxAnalyzerBundle extends Bundle
+class Whyte624MailboxAnalyzerBundle extends Bundle
 {
     /**
      * {@inheritdoc}
