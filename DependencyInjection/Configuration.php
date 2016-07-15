@@ -18,7 +18,7 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('mailbox_analyzer');
+        $rootNode = $treeBuilder->root('whyte624_mailbox_analyzer');
         $rootNode
             ->children()
                 ->arrayNode('mailboxes')
