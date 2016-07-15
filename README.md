@@ -1,4 +1,5 @@
 # README
+[![Build Status](https://secure.travis-ci.org/whyte624/MailboxAnalyzerBundle.png)](http://travis-ci.org/whyte624/MailboxAnalyzerBundle)
 
 ## Documentation
 
